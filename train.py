@@ -132,19 +132,19 @@ def train_model(epochs,
             train_data_loader, optimizer, model, criterion, train_logs, val_logs)
 
         # Принт результатов тренировки
-        print("Тренировка")
+        print("\nТренировка")
         print(f"Эпоха {epoch+1}", end=' ')
         print(f"Точность: {round(acc, 4)}", end=' ')
-        print(f"Время : {round(_time, 4)}", end=' ')
+        print(f"Время : {round(_time, 4)}")
 
         # Проверка модели на этой эпохе
         loss, acc, _time, best_val_acc = val_one_epoch(
             test_data_loader, best_val_acc, model, criterion,train_logs, val_logs)
 
         # Принт результатов проверки
-        print("Проверка")
+        print("\nПроверка")
         print(f"Эпоха {epoch+1}", end=' ')
         print(f"Точность: {round(acc, 4)}", end=' ')
-        print(f"Время : {round(_time, 4)}", end=' ')
+        print(f"Время : {round(_time, 4)}")
 
     return train_logs, val_logs
