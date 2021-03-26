@@ -1,13 +1,14 @@
-import numpy as np
-import torch
 import os
-from torch.utils.data import Dataset
 import cv2
+import torch
+import random
+import numpy as np
+from torch.utils.data import Dataset
 
 
 class CatDogDataset(Dataset):
 
-    def __init__(self, mode, transforms=None, img_size=(224, 224)):
+    def __init__(self, mode, img_size=(224, 224), transforms=None):
 
         super().__init__()
         self.class_to_int = {'cat': 0, 'dog': 1}
@@ -27,9 +28,8 @@ class CatDogDataset(Dataset):
         # Reading, converting and normalizing image
         img = cv2.imread(self.dir + '/' + image_name, cv2.IMREAD_COLOR)
         img = cv2.resize(img, self.img_size)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)
-        img /= 255.
-        img = torch.from_numpy(img).permute(2, 0, 1)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8)
+        # img /= 255.
 
         if self.mode == "train" or self.mode == "val":
 
@@ -38,6 +38,8 @@ class CatDogDataset(Dataset):
 
             if self.transforms:
                 img = self.transforms(img)
+            else:
+                img = torch.from_numpy(img).permute(2, 0, 1)
 
             return img, label
 
@@ -55,9 +57,26 @@ def read_img_test(path, device):
     # Reading, converting and normalizing image
     img = cv2.imread(path, cv2.IMREAD_COLOR)
     img = cv2.resize(img, (224, 224))
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)
-    img /= 255.
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8)
     img = img[..., np.newaxis]
     img = torch.from_numpy(img).permute(3, 2, 0, 1)
     img.to(device)
     return img
+
+
+def read_img_augment(path):
+    # Reading, converting and normalizing image
+    img = cv2.imread(path, cv2.IMREAD_COLOR)
+    img = cv2.resize(img, (224, 224))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8)
+    return img
+
+
+def read_random_images(num, path):
+    files = random.sample(os.listdir(path), num)
+    lst = []
+    for file in files:
+        path = f'train/{file}'
+        lst.append(read_img_augment(path))
+    images = np.array(lst, dtype=np.uint8)
+    return images
