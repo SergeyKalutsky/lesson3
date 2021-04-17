@@ -26,9 +26,12 @@ class CatDogDataset(Dataset):
         image_name = self.imgs[idx]
 
         # Reading, converting and normalizing image
-        img = cv2.imread(self.dir + '/' + image_name, cv2.IMREAD_COLOR)
-        img = cv2.resize(img, self.img_size)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8)
+        try:
+            img = cv2.imread(self.dir + '/' + image_name, cv2.IMREAD_COLOR)
+            img = cv2.resize(img, self.img_size)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.uint8)
+        except:
+            print(self.dir + '/' + image_name)
         # img /= 255.
 
         if self.mode == "train" or self.mode == "val":
@@ -37,9 +40,9 @@ class CatDogDataset(Dataset):
             label = torch.tensor(label, dtype=torch.float32)
 
             if self.transforms:
-                img = self.transforms(img)
-            else:
-                img = torch.from_numpy(img).permute(2, 0, 1)
+                img = self.transforms(image=img)
+            img = torch.from_numpy(np.flip(img,axis=0).copy()).permute(2, 0, 1)
+            img = img.float()
 
             return img, label
 
